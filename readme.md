@@ -26,8 +26,8 @@ Easily, the most important piece of advice I can offer is to keep in mind that t
 
 ### The Goal
 
-Imagine that you're building an app for advertising job listings. Now, when an employer posts a new job listing, a number of things need to happen, right?
-Well, don't put all that stuff into your controller! Instead, let's leverage querys, handlers, and domain events to clean up our code.
+Imagine that you're building an app for analysing of job advertisements. When you make pages with massive reports, many work is done to prepare data to be shown, right?
+Well, don't put all that stuff into your controller! Instead, let's leverage queries and handlers to clean up our code.
 
 ### The Controller
 
@@ -38,16 +38,16 @@ To begin, we can inject this package's `QuerierTrait` into your controller (or a
 
 use SMGladkovskiy\Querier\QuerierTrait;
 
-class JobsController extends \BaseController {
+class AdvertisementsController extends \BaseController {
 
 	use QuerierTrait;
 
 	/**
-	 * Publish the new job listing.
+	 * Build a report of job advertisements.
 	 *
 	 * @return Response
 	 */
-	public function store()
+	public function getAdvertisementsList()
 	{
 
 	}
@@ -55,32 +55,32 @@ class JobsController extends \BaseController {
 }
 ```
 
-Good? Next, we'll represent this "instruction" (to post a job listing) as a query. This will be nothing more than a simple DTO.
+Good? Next, we'll represent this "instruction" (to get data for our report) as a query. This will be nothing more than a simple DTO.
 
 ```php
 <?php
 
 use SMGladkovskiy\Querier\QuerierTrait;
-use Acme\Jobs\VacanciesListQuery;
+use Acme\Queries\AdvertisementsListQuery;
 
-class JobsController extends \BaseController {
+class AdvertisementsController extends \BaseController {
 
 	use QuerierTrait;
 
 	/**
-	 * Post the new job listing.
+	 * Build a report of job advertisements.
 	 *
 	 * @return Response
 	 */
-	public function store()
+	public function getAdvertisementsList()
 	{
-        $this->executeQuery(VacanciesListQuery::class);
+		$advertisements = $this->executeQuery(AdvertisementsListQuery::class);
 
-		return Redirect::home();
+		return View::make('reports.advertisements', compact('advertisements'));
 	}
 ```
 
-Notice how we are representing the user's instruction (or query) as a readable class: `VacanciesListQuery`. The `execute` method will expect the query's class path, as a string. Above, we're using the helpful `VacanciesListQuery::class` to fetch this. Alternatively, you could manually write out the path as a string.
+Notice how we are representing the user's instruction (or query) as a readable class: `AdvertisementsListQuery`. The `executeQuery` method will expect the query's class path, as a string. Above, we're using the helpful `AdvertisementsListQuery::class` to fetch this. Alternatively, you could manually write out the path as a string.
 
 ### The Query DTO
 
@@ -88,31 +88,31 @@ Pretty simply, huh? We make a query to represent the instruction, and then we th
 Here's what that query might look like:
 
 ```php
-<?php namespace Acme\Jobs;
+<?php namespace Acme\Queries;
 
-class VacanciesListQuery {
+class AdvertisementsListQuery {
 
     public $title;
 
-    public $description;
+    public $position_id;
 
-    public function __construct($title, $description)
+    public function __construct($title = null, $position = null)
     {
         $this->title = $title;
-        $this->description = $description;
+        $this->position_id = $position;
     }
 
 }
 ```
 
-> When you call the `execute` method on the `QuerierTrait`, it will automatically map the data from `Input::all()` to your query. You won't need to worry about doing that manually.
+> When you call the `executeQuery` method on the `QuerierTrait`, it will automatically map the data from `Input::all()` to your query. You won't need to worry about doing that manually.
 
-So what exactly does the query bus do? Think of it as a simple utility that will translate this query into an associated handler class that will, well, handle the query! In this case, that means delegating as needed to post the new job listing.
+So what exactly does the query bus do? Think of it as a simple utility that will translate this query into an associated handler class that will, well, handle the query! In this case, that means delegating as needed to get a list of job advertisements.
 
 By default, the query bus will do a quick search and replace on the name of the query class to figure out which handler class to resolve out of the IoC container. As such:
 
-- VacanciesListQuery => VacanciesListQueryHandler
-- VacanciesInArchiveQuery => VacanciesInArchiveQueryHandler
+- AdvertisementsListQuery => AdvertisementsListQueryHandler
+- AdvertisementsInArchiveQuery => AdvertisementsInArchiveQueryHandler
 
 Make sense? Good. Keep in mind, though, that if you prefer a different naming convention, you can override the defaults. See below.
 
@@ -121,11 +121,11 @@ Make sense? Good. Keep in mind, though, that if you prefer a different naming co
 There may be times when you want to decorate the query bus to first perform some kind of action...maybe you need to first sanitize some data. Well, that's easy. First, create a class that implements the `SMGladkovskiy\Querier\QueryBus` contract...
 
 ```php
-<?php namespace Acme\Jobs;
+<?php namespace Acme\Queries;
 
 use SMGladkovskiy\Querier\QueryBus;
 
-class JobSanitizer implements QueryBus {
+class AdvertisementSanitizer implements QueryBus {
 
     public function executeQuery($query)
     {
@@ -138,8 +138,8 @@ class JobSanitizer implements QueryBus {
 ...and now reference this class, when you execute the query in your controller.
 
 ```php
-$this->executeQuery(VacanciesListQuery::class, null, [
-    'JobSanitizer'
+$this->executeQuery(AdvertisementsListQuery::class, null, [
+    'AdvertisementSanitizer'
 ]);
 ```
 
@@ -150,29 +150,27 @@ And that's it! Now, you have a hook to sanitize the query/data before it's passe
 Let's create our first handler class now:
 
 ```php
-<?php namespace Acme\Jobs;
+<?php namespace Acme\Queries;
 
 use SMGladkovskiy\Querier\QueryHandler;
-use SMGladkovskiy\Querier\Events\DispatchableTrait;
 
-class VacanciesListQueryHandler implements QueryHandler {
-
-    use DispatchableTrait;
+class AdvertisementsListQueryHandler implements QueryHandler {
 
     public function handle($query)
     {
-        $job = Job::post($query->title, $query->description);
-
-        $this->dispatchEventsFor($job);
-
-        return $job;
+        $advertisements = Advertisement::where(function($query) use ($query as $filterData)
+        {
+            $query->where('title', $filterData->title);
+            $query->where('position_id', $filterData->position_id);
+        })->paginate(15);
+        
+        return $advertisements;
     }
 
 }
 ```
 
-For this demo, our handler is fairly simple. In real-life, more would be going on here. Notice that `dispatchEventsFor` method? This will handle the process of firing all queued events for your entity. This way, other parts of your app may listen
-for when a job has been published, and respond accordingly.
+For this demo, our handler is fairly simple. In real-life, more would be going on here.
 
 ### Validation
 
@@ -180,16 +178,16 @@ This package also includes a validation trigger automatically. As an example, wh
 it will call a `validate` method on this class. If it doesn't exist, it'll simply continue on. So, this gives you a nice hook to perform validation before executing the query and firing domain events.
 The convention is:
 
-- VacanciesListQuery => VacanciesListValidator
+- AdvertisementsListQuery => AdvertisementsListValidator
 
-So, simply create that class, and include a `validate` method, which we'll receive the `VacanciesListQuery` object. Then, perform your validation however you normally do. I recommend that, for failed validation, you throw an exception - perhaps `ValidationFailedException`. This way, either within your controller - or even `global.php` - you can handle failed validation appropriately (probably by linking back to the form and notifying the user).
+So, simply create that class, and include a `validate` method, which we'll receive the `AdvertisementsListQuery` object. Then, perform your validation however you normally do. I recommend that, for failed validation, you throw an exception - perhaps `ValidationFailedException`. This way, either within your controller - or even `global.php` - you can handle failed validation appropriately (probably by linking back to the form and notifying the user).
 
 ## Overriding Paths
 
 By default, this package makes some assumptions about your file structure. As demonstrated above:
 
-- Path/To/VacanciesListQuery => Path/To/VacanciesListQueryHandler
-- Path/To/VacanciesListQuery => Path/To/VacanciesListValidator
+- Path/To/AdvertisementsListQuery => Path/To/AdvertisementsListQueryHandler
+- Path/To/AdvertisementsListQuery => Path/To/AdvertisementsListValidator
 
 Perhaps you had something different in mind. No problem! Just create your own query translator class that implements the `SMGladkovskiy\Querier\QueryTranslator` interface. This interface includes two methods:
 
