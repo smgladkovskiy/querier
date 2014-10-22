@@ -1,0 +1,18 @@
+<?php namespace ;
+
+use SMGladkovskiy\Querier\QueryHandler;
+
+class FooCommandHandler implements QueryHandler {
+
+    /**
+     * Handle the query.
+     *
+     * @param object $query
+     * @return void
+     */
+    public function handle($query)
+    {
+
+    }
+
+}

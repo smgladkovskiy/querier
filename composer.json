@@ -1,0 +1,29 @@
+{
+    "name": "smgladkovskiy/querier",
+    "description": "Queries for Command-Query Separation Principle in Laravel",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Sergey Gladkovskiy",
+            "email": "smgladkovskiy@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "illuminate/console": "~4.0",
+        "illuminate/support": "~4.0",
+        "illuminate/filesystem": "~4.0",
+        "laracasts/commander": "~1.0",
+        "mustache/mustache": "~2.6"
+    },
+    "require-dev": {
+        "phpspec/phpspec": "~2.0.0",
+	    "codeception/codeception": "~2.0.0"
+    },
+    "autoload": {
+        "psr-0": {
+            "SMGladkovskiy\\Querier": "src/"
+        }
+    },
+    "minimum-stability": "stable"
+}
