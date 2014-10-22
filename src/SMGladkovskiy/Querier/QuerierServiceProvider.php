@@ -1,7 +1,6 @@
 <?php namespace SMGladkovskiy\Querier;
 
 use Illuminate\Support\ServiceProvider;
-use SMGladkovskiy\Querier\Console\QueryInputParser;
 
 class QuerierServiceProvider extends ServiceProvider {
 
@@ -23,7 +22,7 @@ class QuerierServiceProvider extends ServiceProvider {
 
         $this->registerQueryBus();
 
-        $this->registerArtisanQuery();
+        $this->registerArtisanCommand();
     }
 
     /**
@@ -51,7 +50,7 @@ class QuerierServiceProvider extends ServiceProvider {
     {
         $this->app->bindShared('SMGladkovskiy\Querier\QueryBus', function ($app)
         {
-            $default = $app->make('SMGladkovskiy\Querier\DefaultQueryBus');
+            $default    = $app->make('SMGladkovskiy\Querier\DefaultQueryBus');
             $translator = $app->make('SMGladkovskiy\Querier\QueryTranslator');
 
             return new ValidationQueryBus($default, $app, $translator);
@@ -65,12 +64,11 @@ class QuerierServiceProvider extends ServiceProvider {
      */
     public function registerArtisanCommand()
     {
-        $this->app->bindShared('querier.query.make', function($app)
+        $this->app->bindShared('querier.query.make', function ($app)
         {
             return $app->make('SMGladkovskiy\Querier\Console\QuerierGenerateQuery');
         });
 
         $this->commands('querier.query.make');
     }
-
 }

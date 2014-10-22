@@ -1,10 +1,10 @@
 <?php namespace SMGladkovskiy\Querier\Console;
 
 use Illuminate\Console\Command;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Input\InputArgument;
 use Illuminate\Filesystem\Filesystem;
 use Mustache_Engine;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 
 class QuerierGenerateQuery extends Command {
 
@@ -46,11 +46,11 @@ class QuerierGenerateQuery extends Command {
      * Create a new command instance.
      *
      * @param QueryInputParser $parser
-     * @param QueryGenerator $generator
+     * @param QueryGenerator   $generator
      */
     public function __construct(QueryInputParser $parser, QueryGenerator $generator)
     {
-        $this->parser = $parser;
+        $this->parser    = $parser;
         $this->generator = $generator;
 
         parent::__construct();
@@ -63,26 +63,18 @@ class QuerierGenerateQuery extends Command {
      */
     public function fire()
     {
-        $path = $this->argument('path');
+        $path       = $this->argument('path');
         $properties = $this->option('properties');
-        $base = $this->option('base');
+        $base       = $this->option('base');
 
         // Parse the command input.
         $commandInput = $this->parser->parse($path, $properties);
-        $handlerInput = $this->parser->parse($path.'Handler', $properties);
+        $handlerInput = $this->parser->parse($path . 'Handler', $properties);
 
         // Actually create the files with the correct boilerplate.
-        $this->generator->make(
-            $commandInput,
-            __DIR__.'/stubs/query.stub',
-            "{$base}/{$path}.php"
-        );
+        $this->generator->make($commandInput, __DIR__ . '/stubs/query.stub', "{$base}/{$path}.php");
 
-        $this->generator->make(
-            $handlerInput,
-            __DIR__.'/stubs/handler.stub',
-            "{$base}/{$path}Handler.php"
-        );
+        $this->generator->make($handlerInput, __DIR__ . '/stubs/handler.stub', "{$base}/{$path}Handler.php");
 
         $this->info('All done! Your two classes have now been generated.');
     }
@@ -102,9 +94,14 @@ class QuerierGenerateQuery extends Command {
     protected function getOptions()
     {
         return [
-            ['properties', null, InputOption::VALUE_OPTIONAL, 'A comma-separated list of properties for the command.', null],
+            [
+                'properties',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'A comma-separated list of properties for the command.',
+                null
+            ],
             ['base', null, InputOption::VALUE_OPTIONAL, 'The path to where your domain root is located.', 'app']
         ];
     }
-
 }

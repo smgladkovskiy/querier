@@ -3,11 +3,11 @@
 interface QueryBus {
 
     /**
-     * Execute a command
+     * Execute a query
      *
      * @param $query
+     *
      * @return mixed
      */
     public function execute($query);
-
 }

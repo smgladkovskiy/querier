@@ -4,8 +4,8 @@ class QueryInputParser {
 
     public function parse($path, $properties)
     {
-        $segments = explode('\\', str_replace('/', '\\', $path));
-        $name = array_pop($segments);
+        $segments  = explode('\\', str_replace('/', '\\', $path));
+        $name      = array_pop($segments);
         $namespace = implode('\\', $segments);
 
         $properties = $this->parseProperties($properties);
@@ -17,5 +17,4 @@ class QueryInputParser {
     {
         return preg_split('/ ?, ?/', $properties, null, PREG_SPLIT_NO_EMPTY);
     }
-
 }
