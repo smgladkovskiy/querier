@@ -51,7 +51,7 @@ class DefaultQueryBus implements QueryBus {
      *
      * @return mixed
      */
-    public function execute($query)
+    public function executeQuery($query)
     {
         $this->executeDecorators($query);
 
@@ -80,7 +80,7 @@ class DefaultQueryBus implements QueryBus {
                 throw new InvalidArgumentException($message);
             }
 
-            $instance->execute($query);
+            $instance->executeQuery($query);
         }
     }
 }

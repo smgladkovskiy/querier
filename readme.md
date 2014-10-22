@@ -74,7 +74,7 @@ class JobsController extends \BaseController {
 	 */
 	public function store()
 	{
-        $this->execute(VacanciesListQuery::class);
+        $this->executeQuery(VacanciesListQuery::class);
 
 		return Redirect::home();
 	}
@@ -127,7 +127,7 @@ use SMGladkovskiy\Querier\QueryBus;
 
 class JobSanitizer implements QueryBus {
 
-    public function execute($query)
+    public function executeQuery($query)
     {
        // sanitize the job data
     }
@@ -138,7 +138,7 @@ class JobSanitizer implements QueryBus {
 ...and now reference this class, when you execute the query in your controller.
 
 ```php
-$this->execute(VacanciesListQuery::class, null, [
+$this->executeQuery(VacanciesListQuery::class, null, [
     'JobSanitizer'
 ]);
 ```

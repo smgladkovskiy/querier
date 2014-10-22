@@ -47,13 +47,13 @@ class ValidationQueryBus implements QueryBus {
     }
 
     /**
-     * Execute a command with validation.
+     * Execute a query with validation.
      *
      * @param $query
      *
      * @return mixed
      */
-    public function execute($query)
+    public function executeQuery($query)
     {
         // If a validator is "registered," we will
         // first trigger it, before moving forward.
@@ -63,7 +63,7 @@ class ValidationQueryBus implements QueryBus {
         $this->executeDecorators($query);
 
         // And finally pass through to the handler class.
-        return $this->bus->execute($query);
+        return $this->bus->executeQuery($query);
     }
 
     /**
@@ -101,7 +101,7 @@ class ValidationQueryBus implements QueryBus {
                 throw new InvalidArgumentException($message);
             }
 
-            $instance->execute($query);
+            $instance->executeQuery($query);
         }
     }
 }

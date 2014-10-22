@@ -28,9 +28,9 @@ class ValidationQueryBusSpec extends ObjectBehavior
         $validator->validate($query)->willThrow('RuntimeException');
 
         // Delegated responsibility
-        $bus->execute($query)->shouldNotBeCalled();
+        $bus->executeQuery($query)->shouldNotBeCalled();
 
-        $this->shouldThrow('RuntimeException')->duringExecute($query);
+        $this->shouldThrow('RuntimeException')->duringExecuteQuery($query);
     }
 
     function it_handles_command_if_validation_succeeds(
@@ -45,9 +45,9 @@ class ValidationQueryBusSpec extends ObjectBehavior
         $application->make(ExampleValidator::class)->willReturn($validator);
 
         // Delegated responsibility
-        $bus->execute($query)->shouldBeCalled();
+        $bus->executeQuery($query)->shouldBeCalled();
 
-        $this->execute($query);
+        $this->executeQuery($query);
     }
 }
 

@@ -16,7 +16,7 @@ trait QuerierTrait {
      *
      * @return mixed
      */
-    public function execute($query, array $input = null, $decorators = [])
+    public function executeQuery($query, array $input = null, $decorators = [])
     {
         $input = $input ?: Input::all();
 
@@ -33,7 +33,7 @@ trait QuerierTrait {
             $bus->decorate($decorator);
         }
 
-        return $bus->execute($query);
+        return $bus->executeQuery($query);
     }
 
     /**

@@ -9,5 +9,5 @@ interface QueryBus {
      *
      * @return mixed
      */
-    public function execute($query);
+    public function executeQuery($query);
 }
