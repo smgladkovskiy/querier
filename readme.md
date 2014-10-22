@@ -1,4 +1,4 @@
-# Laravel Commander
+# Laravel Querier
 
 This package gives you an easy way to leverage queries for Command-Query Separation Principle in your Laravel projects.
 
